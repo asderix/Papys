@@ -1,5 +1,5 @@
 from typing import Tuple, Any
-from request_response import Request, Response
+from papys.request_response import Request, Response
 
 
 class PHook:

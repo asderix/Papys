@@ -2,8 +2,8 @@ import json
 import jsonschema
 from typing import Tuple
 from jsonschema import validate
-from actions.core import PAction
-from request_response import Request, Response
+from papys.actions.core import PAction
+from papys.request_response import Request, Response
 
 
 class JsonRespValidatorAction(PAction):

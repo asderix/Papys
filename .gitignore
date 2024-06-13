@@ -3,3 +3,6 @@ papys/__pycache__/
 *.py[cod]
 *$py.class
 docs/
+build/
+dist/
+*.egg-info

@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from utils import PLogger
+from papys.utils import PLogger
 
 
 class Request:

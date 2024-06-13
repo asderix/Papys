@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="papys",
-    version="0.1.0",
+    version="0.1.1",
     author="Ronny Fuchs",
     author_email="info@asderix.com",
     description="Python Rest-API as a DAG",

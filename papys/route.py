@@ -1,4 +1,4 @@
-from hooks import PHook
+from papys.hooks import PHook
 
 
 class PRoute:

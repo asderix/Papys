@@ -1,7 +1,7 @@
 import json
 from typing import Tuple
-from actions.core import PAction
-from request_response import Request, Response
+from papys.actions.core import PAction
+from papys.request_response import Request, Response
 
 
 class StaticJsonAction(PAction):

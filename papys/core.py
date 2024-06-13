@@ -2,13 +2,13 @@ import json
 import re
 import urllib.parse
 from typing import Tuple, Any
-from route import PRoute
-from actions.core import PAction
-from http_methods import GET, POST, PUT, DELETE
-from request_response import Request, Response
-from hooks import PHook
-from config import PConfig
-from utils import PLogger, PathCache
+from papys.route import PRoute
+from papys.actions.core import PAction
+from papys.http_methods import GET, POST, PUT, DELETE
+from papys.request_response import Request, Response
+from papys.hooks import PHook
+from papys.config import PConfig
+from papys.utils import PLogger, PathCache
 
 
 _http_code_mapping = {

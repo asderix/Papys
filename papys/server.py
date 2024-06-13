@@ -1,5 +1,5 @@
 from wsgiref.simple_server import make_server
-import core
+import papys.core as core
 
 
 def run(app=core.app, host="localhost", port=8000):
