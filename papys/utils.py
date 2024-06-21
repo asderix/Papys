@@ -41,8 +41,9 @@ class PLogger:
 
         log_id = str(uuid.uuid4())
         print(
-            {
+            {                
                 "date": datetime.now(timezone.utc).isoformat(),
+                "severity": "Error",
                 "logId": log_id,
                 "logCode": log_code,
                 "message": message,
@@ -68,8 +69,9 @@ class PLogger:
         if self.log_level > 1:
             log_id = str(uuid.uuid4())
             print(
-                {
+                {                    
                     "date": datetime.now(timezone.utc).isoformat(),
+                    "severity": "Warning",
                     "logId": log_id,
                     "logCode": log_code,
                     "message": message,
@@ -96,6 +98,7 @@ class PLogger:
             print(
                 {
                     "date": datetime.now(timezone.utc).isoformat(),
+                    "severity": "Info",
                     "logId": log_id,
                     "logCode": log_code,
                     "message": message,

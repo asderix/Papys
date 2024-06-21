@@ -1,3 +1,4 @@
+import traceback
 from typing import Tuple
 from papys.actions.core import PAction
 from papys.request_response import Request, Response
@@ -35,7 +36,7 @@ class RedirectAction(PAction):
             return self.redirect_status_code, req, resp
         except Exception as err:
             req.logger.log_error(
-                "RedirectAction could not processed.", str(err), 122, req
+                "RedirectAction could not processed.", traceback.format_exc(), 122, req
             )
             resp.is_error = True
             resp.error = err

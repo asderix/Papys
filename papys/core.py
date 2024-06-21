@@ -1,6 +1,7 @@
 import json
 import re
 import urllib.parse
+import traceback
 from typing import Tuple, Any
 from papys.route import PRoute
 from papys.actions.core import PAction
@@ -223,6 +224,7 @@ def _handle_request(req: Request, resp: Response, actions: dict, alt: list = [])
 def _create_request(environ: dict) -> Request:
     req = Request()
     req.logger = _logger
+    req.global_config = _config
     req.path = environ.get("PATH_INFO", "")
     req.server_name = environ.get("SERVER_NAME", "")
     req.gateway_interface = environ.get("GATEWAY_INTERFACE", "")
@@ -250,6 +252,16 @@ def _create_request(environ: dict) -> Request:
     req.http_accept_encoding = environ.get("HTTP_ACCEPT_ENCODING", "")
     req.http_connection = environ.get("HTTP_CONNECTION", "")
     req.http_cookie = environ.get("HTTP_COOKIE", "")
+
+    cookie_dict = {}
+    splitted_cookie = req.http_cookie.split(";")
+    if splitted_cookie[0] is not "":
+        for cookie in splitted_cookie:
+            key, value = cookie.split("=")
+            cookie_dict[key.strip()] = value
+
+    req.parsed_cookie = cookie_dict
+
     req.http_upgrade_insecure_requests = environ.get(
         "HTTP_UPGRADE_INSECURE_REQUESTS", ""
     )
@@ -267,7 +279,9 @@ def _create_request(environ: dict) -> Request:
                 req.body_str = str(req.body_raw)
                 req.body_json = json.loads(req.body_raw)
     except Exception as err:
-        _logger.log_error("Error creating body from WSGI input.", str(err), 100, req)
+        _logger.log_error(
+            "Error creating body from WSGI input.", traceback.format_exc(), 100, req
+        )
 
     return req
 
@@ -368,7 +382,7 @@ def add_route(route: PRoute):
         _add_sub_routes(route.path, route.sub_routes, route.hook)
         _logger.log_info("add_route, _add_sub_routes, done.", 5)
     except Exception as err:
-        _logger.log_error("Error during adding a route.", str(err), 99)
+        _logger.log_error("Error during adding a route.", traceback.format_exc(), 99)
         raise
 
 
@@ -485,6 +499,8 @@ def app(environ, start_response):
                 return content
 
     except Exception as err:
-        _logger.log_error("Error during handling a request.", str(err), 101, req)
+        _logger.log_error(
+            "Error during handling a request.", traceback.format_exc(), 101, req
+        )
         start_response(http_status_code, resp.list_headers())
         return []

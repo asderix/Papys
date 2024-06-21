@@ -1,4 +1,5 @@
 import json
+import traceback
 from typing import Tuple
 from papys.actions.core import PAction
 from papys.request_response import Request, Response
@@ -34,8 +35,13 @@ class StaticJsonAction(PAction):
             return self._status_codes["success"], req, resp
         except Exception as err:
             req.logger.log_error(
-                "StaticJsonAction could not processed.", str(err), 121, req
+                "StaticJsonAction could not processed.", traceback.format_exc(), 121, req
             )
             resp.is_error = True
             resp.error = err
             return self._status_codes["error"], req, resp
+
+
+# TODO
+# class StaticFileAction(PAction)
+# return the File from path. Basedirectory is set in the global config.

@@ -1,3 +1,4 @@
+import traceback
 from typing import Tuple
 from papys.actions.core import PAction
 from papys.request_response import Request, Response
@@ -28,7 +29,7 @@ class PostBounceAction(PAction):
             return self._status_codes["success"], req, resp
         except Exception as err:
             req.logger.log_error(
-                "PostBounceAction could not processed.", str(err), 140, req
+                "PostBounceAction could not processed.", traceback.format_exc(), 140, req
             )
             resp.is_error = True
             resp.error = err

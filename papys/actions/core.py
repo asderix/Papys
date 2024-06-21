@@ -1,3 +1,4 @@
+import traceback
 from typing import Tuple
 from papys.request_response import Request, Response
 
@@ -29,7 +30,7 @@ class PAction:
             return self.process_function(req, resp)
         except Exception as err:
             req.logger.log_error(
-                "PAction function could not processed.", str(err), 120, req
+                "PAction function could not processed.", traceback.format_exc(), 120, req
             )
             resp.is_error = True
             resp.error = err            

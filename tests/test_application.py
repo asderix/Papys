@@ -14,6 +14,7 @@ from papys.http_methods import GET, POST, PUT, DELETE
 from papys.config import PConfig
 import papys.core as papys
 import papys.server as dev_server
+from papys.security import KcOIDCFactory
 
 
 """
@@ -481,7 +482,73 @@ supplier_route = R(
     ),
 ]
 
+schema_error_sanitizer_schema = {
+    "type": "object",
+    "properties": {
+        "name": {"type": "string"},
+    },
+    "required": ["name"],
+    "additionalProperties": False,
+}
+
+bad_response = {"name": "Testname", "addElement": "Not allowed"}
+
+
+test_neg_route = R("/test") >> [
+    (
+        GET,
+        JsonA("A bad response", bad_response)
+        >> [
+            (
+                200,
+                RespV("Validate schema", schema_error_sanitizer_schema)
+                >> [(500, ErrA("Handle Schema error"))],
+            )
+        ],
+    )
+]
+
+
+def set_cookie(req: Request, resp: Response):
+    resp.add_cookie(
+        "authcookie",
+        "Bearer 123",
+        resp.create_cookie_attributes(
+            http_only=True, same_site="Strict", http_domain="localhost"
+        ),
+    )
+
+    resp.to_convert = {"cookie": True, "my_cookie": str(type(req.http_cookie))}
+    return 200, req, resp
+
+
+cookie_route = R("/cookie") >> [(GET, A("Test cookies", set_cookie))]
+
 papys.set_config(PConfig(post_convert_201=True))
+
+# OAuth integration
+
+with KcOIDCFactory() as oidc:
+    oidc.server_host = "https://example.com"
+    oidc.callback_path = "/callback"
+    oidc.login_path = "/login"
+    oidc.logout_path = "/logout"
+    oidc.auth_url = "https://your-keycloak.com/auth/realms/"
+    oidc.client_id = "your-client-id"
+    oidc.client_secret = "your-client-secret"
+    oidc.realm = "your-realm"
+    oidc.redirect_to_login = True
+    oidc.app_redirect_url = "https://example.com"
+
+oidc_guard = oidc.get_route_guard_hook()
+
+protected_route = R("/protected", oidc_guard) >> [
+    (GET, JsonA("Protected ressource", {"access": "granted"}))
+]
+
+papys.add_route(protected_route)
+
+# ---
 
 user_route | doc_route
 users_route | user_route
@@ -491,6 +558,8 @@ suppliers_route | supplier_route
 
 papys.add_route(users_route)
 papys.add_route(suppliers_route)
+papys.add_route(test_neg_route)
+papys.add_route(cookie_route)
 
 
 class InitializeHook(Hook):
@@ -507,7 +576,7 @@ class InitializeHook(Hook):
         return True, 200, req, resp
 
 
-def finalize(req, resp: Response):    
+def finalize(req, resp: Response):
     print("And here is the finalize hook message.")
     # True or False doesn't matter here.
     # Only the status code and the response are relevant.
