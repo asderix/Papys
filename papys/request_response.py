@@ -379,6 +379,7 @@ class Response:
         self._content_type = "application/json"
         self._json = None
         self._to_convert = None
+        self._custom_bytearray = None
         self._is_error = False
         self._error = None
         self._headers = {}
@@ -393,19 +394,27 @@ class Response:
         self._json = value
 
     @property
-    def to_convert(self) -> object:
+    def to_convert(self) -> dict:
         return self._to_convert
 
     @to_convert.setter
-    def to_convert(self, value: object):
+    def to_convert(self, value: dict):
         self._to_convert = value
+
+    @property
+    def custom_bytearray(self) -> bytearray:
+        return self._custom_bytearray
+
+    @custom_bytearray.setter
+    def custom_bytearray(self, value: bytearray):
+        self._custom_bytearray = value
 
     @property
     def status_code(self) -> int:
         return self._status_code
 
     @status_code.setter
-    def status_code(self, value: int):
+    def status_code(self, value: int):        
         self._status_code = value
 
     @property
@@ -442,7 +451,7 @@ class Response:
             headers_list.append(("Set-Cookie", f"{key}={value}"))
         return headers_list
 
-    def add_cookie(self, name: str, value: str, attributes: list = None):
+    def add_cookie(self, name: str, value: str, attributes: list = []):
         attr_str = "; ".join(attributes)
         self._cookies[name] = value + "; " + attr_str if attr_str else value
 
@@ -456,6 +465,7 @@ class Response:
     def reset_content(self):
         self.json = None
         self.to_convert = None
+        self.custom_bytearray = None
 
     def create_cookie_attributes(
         self,

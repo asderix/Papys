@@ -5,7 +5,7 @@ from papys.actions.core import PAction
 from papys.request_response import Request, Response, COOKIE_SAME_SITE_LAX
 
 
-class KcOIDCCallbackAction(PAction):
+class KcOidcAcfCallbackAction(PAction):
     """
     A class that handle the Keycloak callback call after the user login.
     This class is created from KcOIDCFactory. It's recommended to not
@@ -98,7 +98,7 @@ class KcOIDCCallbackAction(PAction):
             return self._status_codes["error"], req, resp
 
 
-class KcOIDCLogoutAction(PAction):
+class KcOidcAcfLogoutAction(PAction):
     """
     A class handle the logout request from a client.
     This class is created from KcOIDCFactory. It's recommended to not

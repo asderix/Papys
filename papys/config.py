@@ -14,8 +14,8 @@ class PConfig:
         self,
         log_level: int = 2,
         post_convert_201: bool = True,
-        return_error500_body=False,
-        accept_default_lang="US-en",
+        return_error500_body: bool = False,
+        accept_default_lang: str = "en-US",
     ):
         self._log_level = log_level
         self._post_convert_201 = post_convert_201

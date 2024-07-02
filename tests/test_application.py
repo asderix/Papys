@@ -14,7 +14,8 @@ from papys.http_methods import GET, POST, PUT, DELETE
 from papys.config import PConfig
 import papys.core as papys
 import papys.server as dev_server
-from papys.security import KcOIDCFactory
+from papys.security import KcOidcAcfFactory
+from papys.security_hooks import KcOidcAcfAuthorizationHook
 
 
 """
@@ -521,26 +522,32 @@ def set_cookie(req: Request, resp: Response):
     resp.to_convert = {"cookie": True, "my_cookie": str(type(req.http_cookie))}
     return 200, req, resp
 
-
 cookie_route = R("/cookie") >> [(GET, A("Test cookies", set_cookie))]
 
 papys.set_config(PConfig(post_convert_201=True))
 
 # OAuth integration
 
-with KcOIDCFactory() as oidc:
-    oidc.server_host = "https://example.com"
+with KcOidcAcfFactory() as oidc:
+    oidc.server_host = "http://localhost:8000"
     oidc.callback_path = "/callback"
     oidc.login_path = "/login"
     oidc.logout_path = "/logout"
-    oidc.auth_url = "https://your-keycloak.com/auth/realms/"
-    oidc.client_id = "your-client-id"
-    oidc.client_secret = "your-client-secret"
-    oidc.realm = "your-realm"
+    oidc.auth_url = "https://lemur-8.cloud-iam.com/auth/realms/"
+    oidc.client_id = "papys"
+    oidc.client_secret = "FRzMBvTQrqcgrZyxq6rM7WjeJSRxQn2L"
+    oidc.realm = "papys-test"
     oidc.redirect_to_login = True
-    oidc.app_redirect_url = "https://example.com"
+    oidc.app_redirect_url = "http://localhost:8000/protected"
 
 oidc_guard = oidc.get_route_guard_hook()
+
+auth_hook = KcOidcAcfAuthorizationHook()
+auth_hook.type = "allow"
+auth_hook.POST_groups = { "/normal-users" }
+auth_hook.add_user_sub_to_body = True
+
+oidc_guard >> auth_hook
 
 protected_route = R("/protected", oidc_guard) >> [
     (GET, JsonA("Protected ressource", {"access": "granted"}))

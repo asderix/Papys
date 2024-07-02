@@ -3,18 +3,19 @@ import papys.core
 from papys.route import PRoute as R
 from papys.actions.flows import RedirectAction
 from papys.http_methods import GET
-from papys.hooks import PHook, KcOICDRouteGuardHook
-from papys.actions.authentication import KcOIDCCallbackAction, KcOIDCLogoutAction
+from papys.hooks import PHook
+from papys.security_hooks import KcOidcAcfRouteGuardHook
+from papys.actions.authentication import KcOidcAcfCallbackAction, KcOidcAcfLogoutAction
 
 
-class KcOIDCFactory:
+class KcOidcAcfFactory:
     """
     A class providing Keycloak OIDC security on the Papys app.
     Use this factory with the with statement:
 
     Minimum usage:
 
-    with KcOIDCFactory() as oidc:
+    with KcOIDCFactoryACF() as oidc:
         oidc.server_host = "https://host-of-papys-rest-api.com"        
         oidc.auth_url = "https://host-of-keycloak.com/auth/realms/"
         oidc.client_id = "client-id"
@@ -24,7 +25,7 @@ class KcOIDCFactory:
     
     Full configuration:
 
-    with KcOIDCFactory() as oidc:
+    with KcOIDCFactoryACF() as oidc:
         oidc.server_host = "https://host-of-papys-rest-api.com"     
         oidc.callback_path = "/callback"
         oidc.login_path = "/login"
@@ -151,7 +152,7 @@ class KcOIDCFactory:
             "redirect_to_login": self.redirect_to_login,
             "login_path": self.login_path,
         }
-        return KcOICDRouteGuardHook(config)
+        return KcOidcAcfRouteGuardHook(config)
 
     def __enter__(self):
         return self
@@ -185,7 +186,7 @@ class KcOIDCFactory:
             }
 
             callback_route = R(self.callback_path) >> [
-                (GET, KcOIDCCallbackAction("Handle IAM callback", config))
+                (GET, KcOidcAcfCallbackAction("Handle IAM callback", config))
             ]
             papys.core.add_route(callback_route)
 
@@ -196,7 +197,7 @@ class KcOIDCFactory:
             }
 
             logout_route = R(self.logout_path) >> [
-                (GET, KcOIDCLogoutAction("Logout user at IAM", logout_config))
+                (GET, KcOidcAcfLogoutAction("Logout user at IAM", logout_config))
             ]
             papys.core.add_route(logout_route)
 

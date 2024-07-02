@@ -182,9 +182,9 @@ def _execute_hook(
     if hook.sub_hook is not None:
         sub_hook_result = _execute_hook(hook.sub_hook, hook_result[2], hook_result[3])
         if not sub_hook_result[0]:
-            return (False,) + hook_result[1:]
+            return (False,) + sub_hook_result[1:]
         else:
-            return (True,) + hook_result[1:]
+            return (True,) + sub_hook_result[1:]
     else:
         return (True,) + hook_result[1:]
 
@@ -276,14 +276,35 @@ def _create_request(environ: dict) -> Request:
             req.body_stream = environ.get("wsgi.input", None)
             if req.body_stream:
                 req.body_raw = req.body_stream.read(req.content_length).decode("utf-8")
-                req.body_str = str(req.body_raw)
+                req.body_str = str(req.body_raw)                
                 req.body_json = json.loads(req.body_raw)
+    except json.JSONDecodeError:
+        req.body_json = None
+    except RecursionError:
+        req.body_json = None
+    except TypeError:
+        req.body_json = None
+    except UnicodeDecodeError:
+        req.body_raw = None
+        req.body_str = None
+        req.body_json = None
     except Exception as err:
+        print(type(err))
         _logger.log_error(
             "Error creating body from WSGI input.", traceback.format_exc(), 100, req
         )
 
     return req
+
+
+def _evaluate_content(resp: Response):
+    if resp.json is not None:
+        return [resp.json.encode("utf-8")]
+    if resp.to_convert is not None:
+        return [json.dumps(resp.to_convert).encode("utf-8")]
+    if resp.custom_bytearray is not None:
+        return [resp.custom_bytearray]
+    return []
 
 
 def set_config(config: PConfig):
@@ -475,32 +496,14 @@ def app(environ, start_response):
                             }
                         ).encode("utf-8")
                     ]
-                else:
-                    content = (
-                        [resp.json.encode("utf-8")]
-                        if resp.json is not None
-                        else (
-                            [json.dumps(resp.to_convert).encode("utf-8")]
-                            if resp.to_convert is not None
-                            else []
-                        )
-                    )
-                return content
-            case _:
-                content = (
-                    [resp.json.encode("utf-8")]
-                    if resp.json is not None
-                    else (
-                        [json.dumps(resp.to_convert).encode("utf-8")]
-                        if resp.to_convert is not None
-                        else []
-                    )
-                )
-                return content
+                else:                    
+                    return _evaluate_content(resp)
+            case _:                
+                return _evaluate_content(resp)
 
     except Exception as err:
         _logger.log_error(
             "Error during handling a request.", traceback.format_exc(), 101, req
         )
-        start_response(http_status_code, resp.list_headers())
+        start_response(_http_code_mapping.get(500, ""), resp.list_headers())
         return []
