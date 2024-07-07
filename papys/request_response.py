@@ -47,13 +47,15 @@ class Request:
         self._http_connection = ""
         self._http_cookie = ""
         self._parsed_cookie: dict | None = None
+        self._http_authorization: str | None = None
         self._http_upgrade_insecure_requests = ""
         self._http_sec_fetch_dest = ""
         self._http_sec_fetch_mode = ""
         self._http_sec_fetch_site = ""
         self._http_sec_fetch_user = ""
         self._http_priority = ""
-        self._user_info: dict | None = None
+        self._user_info: dict | None = {}
+        self._authentication_method: str | None = None
 
     @property
     def path(self) -> str:
@@ -312,6 +314,14 @@ class Request:
         self._parsed_cookie = value
 
     @property
+    def authorization_header(self) -> str:
+        return self._http_authorization
+
+    @authorization_header.setter
+    def authorization_header(self, value: str):
+        self._http_authorization = value
+
+    @property
     def http_upgrade_insecure_requests(self) -> str:
         return self._http_upgrade_insecure_requests
 
@@ -367,6 +377,20 @@ class Request:
     def user_info(self, value: dict | None):
         self._user_info = value
 
+    @property
+    def authentication_method(self) -> str | None:
+        return self._authentication_method
+
+    @authentication_method.setter
+    def authentication_method(self, value: str | None):
+        self._authentication_method = value
+
+    def get_bearer_token(self) -> str:
+        if self.authorization_header:
+            parts = self.authorization_header.split()
+            return parts[1] if len(parts) > 1 else None
+        return None
+
 
 class Response:
     """
@@ -414,7 +438,7 @@ class Response:
         return self._status_code
 
     @status_code.setter
-    def status_code(self, value: int):        
+    def status_code(self, value: int):
         self._status_code = value
 
     @property

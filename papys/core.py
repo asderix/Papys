@@ -262,6 +262,7 @@ def _create_request(environ: dict) -> Request:
 
     req.parsed_cookie = cookie_dict
 
+    req.authorization_header = environ.get("HTTP_AUTHORIZATION", None)
     req.http_upgrade_insecure_requests = environ.get(
         "HTTP_UPGRADE_INSECURE_REQUESTS", ""
     )

@@ -4,29 +4,30 @@ from papys.route import PRoute as R
 from papys.actions.flows import RedirectAction
 from papys.http_methods import GET
 from papys.hooks import PHook
-from papys.security_hooks import KcOidcAcfRouteGuardHook
+from papys.security_hooks import KcOidcAcfRouteGuardHook, KcOidcCcfRouteGuardHook
 from papys.actions.authentication import KcOidcAcfCallbackAction, KcOidcAcfLogoutAction
 
 
 class KcOidcAcfFactory:
     """
-    A class providing Keycloak OIDC security on the Papys app.
+    A class providing Keycloak OIDC security on the Papys app
+    with Authorization Code Flow.
     Use this factory with the with statement:
 
     Minimum usage:
 
-    with KcOIDCFactoryACF() as oidc:
-        oidc.server_host = "https://host-of-papys-rest-api.com"        
+    with KcOidcAcfFactory() as oidc:
+        oidc.server_host = "https://host-of-papys-rest-api.com"
         oidc.auth_url = "https://host-of-keycloak.com/auth/realms/"
         oidc.client_id = "client-id"
         oidc.client_secret = "the-secret-from-keycloak"
         oidc.realm = "your-realm"
         oidc.app_redirect_url = "http://example.com/where-your-app-is"
-    
+
     Full configuration:
 
-    with KcOIDCFactoryACF() as oidc:
-        oidc.server_host = "https://host-of-papys-rest-api.com"     
+    with KcOidcAcfFactory() as oidc:
+        oidc.server_host = "https://host-of-papys-rest-api.com"
         oidc.callback_path = "/callback"
         oidc.login_path = "/login"
         oidc.logout_path = "/logout"
@@ -201,4 +202,86 @@ class KcOidcAcfFactory:
             ]
             papys.core.add_route(logout_route)
 
+            self._is_open = False
+
+
+class KcOidcCcfFactory:
+    """
+    A class providing Keycloak OIDC security on the Papys app
+    with Client Credential Flow (M2M).
+    Use this factory with the with statement:
+
+    Usage:
+
+    with KcOidcCcfFactory() as oidc:
+        oidc.auth_url = "https://host-of-keycloak.com/auth/realms/"
+        oidc.realm = "your-realm"
+
+    Get your guard hook:
+
+    oicd_guard = oidc.get_route_guard_hook()
+
+    Now you can use this hook in your route(s) you want to protect:
+
+    protected_route = R("/protected", oicd_guard) >> [
+        (GET, YourActionHere("My action"))
+    ]
+
+    """
+
+    def __init__(self):
+        self._auth_url: str | None = None
+        self._realm: str | None = None
+        self._client_id: str | None = None
+        self._client_secret: str | None = None
+
+        self._auth_url_postfix: str | None = "protocol/openid-connect/token/introspect"
+        self._is_open: bool = True
+
+    @property
+    def auth_url(self):
+        return self._auth_url
+
+    @auth_url.setter
+    def auth_url(self, value: str | None):
+        self._auth_url = value
+
+    @property
+    def realm(self):
+        return self._realm
+
+    @realm.setter
+    def realm(self, value: str | None):
+        self._realm = value
+
+    @property
+    def client_id(self):
+        return self._client_id
+    
+    @client_id.setter
+    def client_id(self, value: str):
+        self._client_id = value
+
+    @property
+    def client_secret(self):
+        return self._client_secret
+    
+    @client_secret.setter
+    def client_secret(self, value: str):
+        self._client_secret = value
+
+
+    def get_route_guard_hook(self) -> PHook:
+        config = {
+            "validate_url": f"{self.auth_url}/{self._realm}/{self._auth_url_postfix}",
+            "client_id": self.client_id,
+            "client_secret": self.client_secret
+        }
+        return KcOidcCcfRouteGuardHook(config)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):        
+        if self._is_open:
             self._is_open = False

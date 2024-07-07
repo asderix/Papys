@@ -533,10 +533,10 @@ with KcOidcAcfFactory() as oidc:
     oidc.callback_path = "/callback"
     oidc.login_path = "/login"
     oidc.logout_path = "/logout"
-    oidc.auth_url = "https://lemur-8.cloud-iam.com/auth/realms/"
-    oidc.client_id = "papys"
-    oidc.client_secret = "FRzMBvTQrqcgrZyxq6rM7WjeJSRxQn2L"
-    oidc.realm = "papys-test"
+    oidc.auth_url = "https://your-keycloak-host.com/auth/realms/"
+    oidc.client_id = "your-client-id"
+    oidc.client_secret = "your-secret"
+    oidc.realm = "your-realm"
     oidc.redirect_to_login = True
     oidc.app_redirect_url = "http://localhost:8000/protected"
 
