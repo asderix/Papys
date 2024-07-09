@@ -4,7 +4,11 @@ from papys.route import PRoute as R
 from papys.actions.flows import RedirectAction
 from papys.http_methods import GET
 from papys.hooks import PHook
-from papys.security_hooks import KcOidcAcfRouteGuardHook, KcOidcCcfRouteGuardHook
+from papys.security_hooks import (
+    KcOidcAcfRouteGuardHook,
+    KcOidcCcfRouteGuardHook,
+    ApiKeyAuthorizationHook,
+)
 from papys.actions.authentication import KcOidcAcfCallbackAction, KcOidcAcfLogoutAction
 
 
@@ -257,7 +261,7 @@ class KcOidcCcfFactory:
     @property
     def client_id(self):
         return self._client_id
-    
+
     @client_id.setter
     def client_id(self, value: str):
         self._client_id = value
@@ -265,23 +269,95 @@ class KcOidcCcfFactory:
     @property
     def client_secret(self):
         return self._client_secret
-    
+
     @client_secret.setter
     def client_secret(self, value: str):
         self._client_secret = value
-
 
     def get_route_guard_hook(self) -> PHook:
         config = {
             "validate_url": f"{self.auth_url}/{self._realm}/{self._auth_url_postfix}",
             "client_id": self.client_id,
-            "client_secret": self.client_secret
+            "client_secret": self.client_secret,
         }
         return KcOidcCcfRouteGuardHook(config)
 
     def __enter__(self):
         return self
 
-    def __exit__(self, *args):        
+    def __exit__(self, *args):
+        if self._is_open:
+            self._is_open = False
+
+
+class ApiKey:
+    def __init__(self, *, key: str, groups: list = []) -> None:
+        self._key = key
+        self._groups = groups
+
+    @property
+    def key(self) -> str:
+        return self._key
+
+    @key.setter
+    def key(self, value: str):
+        self._key = value
+
+    @property
+    def groups(self) -> list:
+        return self._groups
+
+    @groups.setter
+    def groups(self, value: list):
+        self._groups = value
+
+
+class ApiKeyAuthentificationFactory:
+    def __init__(self) -> None:
+        self._api_keys: list = []
+        self._api_key_qp_name = "apiKey"
+        self._api_key_header_name = "Authorization"
+        self._user_info_group_attribute_name: str = "roles"
+        self._is_open: bool = False
+
+    def add_key(self, key: ApiKey):
+        self._api_keys.append(key)
+
+    @property
+    def api_key_qp_name(self) -> str:
+        return self._api_key_qp_name
+
+    @api_key_qp_name.setter
+    def api_key_qp_name(self, value: str):
+        self._api_key_qp_name = value
+
+    @property
+    def api_key_header_name(self) -> str:
+        return self._api_key_header_name
+
+    @api_key_header_name.setter
+    def api_key_header_name(self, value: str):
+        self._api_key_header_name = value
+
+    @property
+    def user_info_group_attribute_name(self) -> str:
+        return self._user_info_group_attribute_name
+
+    @user_info_group_attribute_name.setter
+    def user_info_group_attribute_name(self, value: str):
+        self._user_info_group_attribute_name = value
+
+    def get_route_guard_hook(self) -> PHook:
+        return ApiKeyAuthorizationHook(
+            self._api_keys,
+            self.api_key_qp_name,
+            self.api_key_header_name,
+            self.user_info_group_attribute_name,
+        )
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
         if self._is_open:
             self._is_open = False

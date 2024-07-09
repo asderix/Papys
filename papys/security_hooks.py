@@ -190,7 +190,7 @@ class KcOidcCcfRouteGuardHook(PHook):
             return False, self._status_codes["error"], req, resp
 
 
-class KcOidcAcfAuthorizationHook(PHook):
+class UserInfoAuthorizationHook(PHook):
     def __init__(self):
         super().__init__()
         self._type: str = AUTH_ALLOW
@@ -336,6 +336,60 @@ class KcAcfCcfSwitchHook(PHook):
             return acf_result
         except Exception as err:
             req.logger.log_error(
-                "Failed to process KcAcfCcfSwitchHook.", traceback.format_exc(), 137, req
+                "Failed to process KcAcfCcfSwitchHook.",
+                traceback.format_exc(),
+                137,
+                req,
+            )
+            return False, 500, req, resp
+
+
+class ApiKeyAuthorizationHook(PHook):
+    def __init__(
+        self,
+        api_keys: list,
+        api_key_qp_name: str = "apiKey",
+        api_key_header_name: str = "Authorization",
+        user_info_group_attribute_name: str = "roles",
+    ):
+        self._api_keys = api_keys
+        self._api_key_qp_name = api_key_qp_name
+        self._api_key_header_name = api_key_header_name
+        self._user_info_group_attribute_name = user_info_group_attribute_name
+        super().__init__()
+        self._api_keys_dict: dict = {}
+        for api_key in api_keys:
+            self._api_keys_dict[api_key.key] = api_key
+
+    def process_hook(
+        self, req: Request, resp: Response
+    ) -> Tuple[bool, int, Request, Response]:
+        try:
+            qp_api_key = req.query_string_dict.get(self._api_key_qp_name, None)
+            if qp_api_key:
+                api_key_check = self._api_keys_dict.get(qp_api_key, None)
+                if api_key_check:
+                    req.user_info = {
+                        "api_key": qp_api_key,
+                        self._user_info_group_attribute_name: api_key_check.groups,
+                    }
+                    return True, 200, req, resp
+            header_api_key = req.authorization_header
+            if header_api_key:
+                api_key_check = self._api_keys_dict.get(header_api_key, None)
+                if api_key_check:
+                    req.user_info = {
+                        "api_key": header_api_key,
+                        self._user_info_group_attribute_name: api_key_check.groups,
+                    }
+                    return True, 200, req, resp
+            req.logger.log_warning("Blocked unauthorized request.", 138, req)
+            return False, 401, req, resp
+        except Exception as err:
+            req.logger.log_error(
+                "Failed to process ApiKeyAuthorizationHook.",
+                traceback.format_exc(),
+                139,
+                req,
             )
             return False, 500, req, resp

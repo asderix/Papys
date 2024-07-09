@@ -15,7 +15,7 @@ from papys.config import PConfig
 import papys.core as papys
 import papys.server as dev_server
 from papys.security import KcOidcAcfFactory
-from papys.security_hooks import KcOidcAcfAuthorizationHook
+from papys.security_hooks import UserInfoAuthorizationHook
 
 
 """
@@ -542,7 +542,7 @@ with KcOidcAcfFactory() as oidc:
 
 oidc_guard = oidc.get_route_guard_hook()
 
-auth_hook = KcOidcAcfAuthorizationHook()
+auth_hook = UserInfoAuthorizationHook()
 auth_hook.type = "allow"
 auth_hook.POST_groups = { "/normal-users" }
 auth_hook.add_user_sub_to_body = True
