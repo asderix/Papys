@@ -11,7 +11,7 @@ class PostBounceAction(PAction):
     i.e. write it to the response. The class is purely for test purposes.
 
     Args:
-        name (str): Die argument is only for you to describe the action in the source code. It's optional.
+        name (str): The argument is only for you to describe the action in the source code. It's optional.
         status_codes (dict): You can customize the returned status in case of success and an error. Default: { 'success': 200, 'error': 500 }.
     """
 
@@ -29,7 +29,10 @@ class PostBounceAction(PAction):
             return self._status_codes["success"], req, resp
         except Exception as err:
             req.logger.log_error(
-                "PostBounceAction could not processed.", traceback.format_exc(), 140, req
+                "PostBounceAction could not processed.",
+                traceback.format_exc(),
+                140,
+                req,
             )
             resp.is_error = True
             resp.error = err
