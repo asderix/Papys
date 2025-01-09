@@ -5,7 +5,7 @@ from papys.request_response import Request, Response, COOKIE_SAME_SITE_STRICT
 
 class PHook:
     """
-    Base class for a hook. This class has to be implemented by a subclass..
+    Base class for a hook. This class has to be implemented by a subclass.
     """
 
     def __init__(self):

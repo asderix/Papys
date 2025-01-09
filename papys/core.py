@@ -128,9 +128,15 @@ def _add_action(path: str, action: PAction, hook: PHook = None):
 def _add_sub_routes(path: str, routes: list, hook: PHook):
     if routes is not None:
         for route_entry in routes:
-            sub_hook = (
-                hook >> route_entry.hook if hook is not None else route_entry.hook
-            )
+            sub_hook = route_entry.hook
+            if hook is not None:
+                current_hook = hook
+                while current_hook.sub_hook is not None:
+                    current_hook = current_hook.sub_hook
+
+                current_hook >> route_entry.hook
+                sub_hook = hook
+
             for action_entry in route_entry.actions:
                 _add_action(path + route_entry.path, action_entry, sub_hook)
             if route_entry.sub_routes:
@@ -255,7 +261,7 @@ def _create_request(environ: dict) -> Request:
 
     cookie_dict = {}
     splitted_cookie = req.http_cookie.split(";")
-    if splitted_cookie[0] is not "":
+    if splitted_cookie[0] != "":
         for cookie in splitted_cookie:
             key, value = cookie.split("=")
             cookie_dict[key.strip()] = value
@@ -277,7 +283,7 @@ def _create_request(environ: dict) -> Request:
             req.body_stream = environ.get("wsgi.input", None)
             if req.body_stream:
                 req.body_raw = req.body_stream.read(req.content_length).decode("utf-8")
-                req.body_str = str(req.body_raw)                
+                req.body_str = str(req.body_raw)
                 req.body_json = json.loads(req.body_raw)
     except json.JSONDecodeError:
         req.body_json = None
@@ -469,8 +475,6 @@ def app(environ, start_response):
         else:
             resp.status_code = initialize_result[1]
 
-        resp.set_header("Content-type", resp.content_type)
-
         match resp.status_code, environ.get("REQUEST_METHOD"), _config.post_convert_201:
             case 200, "POST", True:
                 http_status_code = _http_code_mapping.get(
@@ -481,10 +485,13 @@ def app(environ, start_response):
                     resp.status_code, "500 Internal Server Error"
                 )
 
-        start_response(http_status_code, resp.list_headers())
-
         if 400 <= resp.status_code < 500:
             resp.reset_content()
+            resp.json = "{}"
+
+        resp.set_header("Content-type", resp.content_type)
+
+        start_response(http_status_code, resp.list_headers())
 
         match resp.status_code:
             case 500:
@@ -497,9 +504,9 @@ def app(environ, start_response):
                             }
                         ).encode("utf-8")
                     ]
-                else:                    
+                else:
                     return _evaluate_content(resp)
-            case _:                
+            case _:
                 return _evaluate_content(resp)
 
     except Exception as err:
