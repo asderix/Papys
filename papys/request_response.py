@@ -499,7 +499,7 @@ class Response:
         http_only: bool = False,
         max_age: int | None = None,
         partitioned: bool = False,
-        path: str | None = None,
+        path: str = "/",
         secure: bool | None = None,
         same_site: str | None = None,
     ) -> list:
