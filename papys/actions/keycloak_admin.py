@@ -46,7 +46,7 @@ class KcAddUserAction(PAction):
 
             response = requests.post(
                 self._kc_config.get("kc_host", "")
-                + "/auth/realms/"
+                + "/realms/"
                 + self._kc_config.get("realm", "")
                 + "/protocol/openid-connect/token",
                 data=data,
@@ -215,7 +215,7 @@ class KcChangePwAction(PAction):
 
             response = requests.post(
                 self._kc_config.get("kc_host", "")
-                + "/auth/realms/"
+                + "/realms/"
                 + self._kc_config.get("realm", "")
                 + "/protocol/openid-connect/token",
                 data=data,
@@ -362,7 +362,7 @@ class KcDeleteUserAction(PAction):
 
             response = requests.post(
                 self._kc_config.get("kc_host", "")
-                + "/auth/realms/"
+                + "/realms/"
                 + self._kc_config.get("realm", "")
                 + "/protocol/openid-connect/token",
                 data=data,
