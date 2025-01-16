@@ -379,7 +379,7 @@ class KcDeleteUserAction(PAction):
 
                 response = requests.delete(
                     self._kc_config.get("kc_host", "")
-                    + "/auth/admin/realms/"
+                    + "/admin/realms/"
                     + self._kc_config.get("realm", "")
                     + "/users/"
                     + req.user_info.get("sub", ""),                    
