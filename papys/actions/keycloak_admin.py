@@ -185,7 +185,7 @@ class KcChangePwAction(PAction):
 
     Use this action with a PUT or POST (not recommended) request. Send a JSON body with at least the following attribute:
 
-    {      
+    {
       "password": "<password"
     }
 
@@ -230,19 +230,20 @@ class KcChangePwAction(PAction):
                 headers = {
                     "Content-Type": "application/json",
                     "Authorization": f"Bearer {access_token}",
-                }                
+                }
 
                 data = {
                     "type": "password",
                     "value": body.get("password", None),
-                    "temporary": False
+                    "temporary": False,
                 }
 
                 response = requests.put(
                     self._kc_config.get("kc_host", "")
                     + "/admin/realms/"
                     + self._kc_config.get("realm", "")
-                    + "/users/" + req.user_info.get("sub", "")
+                    + "/users/"
+                    + req.user_info.get("sub", "")
                     + "/reset-password",
                     json=data,
                     headers=headers,
@@ -325,6 +326,7 @@ class KcChangePwAction(PAction):
             resp.error = err
             return self._status_codes["error"], req, resp
 
+
 class KcDeleteUserAction(PAction):
     """
     This action delete a user.
@@ -370,19 +372,19 @@ class KcDeleteUserAction(PAction):
             )
 
             if response.status_code == 200:
-                access_token = response.json().get("access_token")                
+                access_token = response.json().get("access_token")
 
                 headers = {
                     "Content-Type": "application/json",
                     "Authorization": f"Bearer {access_token}",
-                }                                
+                }
 
                 response = requests.delete(
                     self._kc_config.get("kc_host", "")
                     + "/admin/realms/"
                     + self._kc_config.get("realm", "")
                     + "/users/"
-                    + req.user_info.get("sub", ""),                    
+                    + req.user_info.get("sub", ""),
                     headers=headers,
                 )
 
@@ -445,7 +447,7 @@ class KcDeleteUserAction(PAction):
 
             else:
                 req.logger.log_error(
-                    "KcDeleteUserAction could not processed. Error login to the IdP server.",
+                    f"KcDeleteUserAction could not processed. Error login to the IdP server. Response status code: {response.status_code}. Respsone: {str(response)}",
                     traceback.format_exc(),
                     999,
                     req,
