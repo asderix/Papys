@@ -447,7 +447,7 @@ class KcDeleteUserAction(PAction):
 
             else:
                 req.logger.log_error(
-                    f"KcDeleteUserAction could not processed. Error login to the IdP server. Response status code: {response.status_code}. Respsone: {str(response)}",
+                    f"KcDeleteUserAction could not processed. Error login to the IdP server.\nResponse status code: {response.status_code}.\nRespsone: {str(response)}.\nConfiguration: {self._kc_config}.\nData: {data}",
                     traceback.format_exc(),
                     999,
                     req,
