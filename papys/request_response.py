@@ -56,6 +56,7 @@ class Request:
         self._http_priority = ""
         self._user_info: dict | None = {}
         self._authentication_method: str | None = None
+        self._environ: dict | None = {}
 
     @property
     def path(self) -> str:
@@ -390,6 +391,14 @@ class Request:
             parts = self.authorization_header.split()
             return parts[1] if len(parts) > 1 else None
         return None
+    
+    @property
+    def environ(self) -> dict | None:
+        return self._environ
+
+    @environ.setter
+    def environ(self, value: dict | None):
+        self._environ = value
 
 
 class Response:

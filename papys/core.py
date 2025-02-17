@@ -278,6 +278,8 @@ def _create_request(environ: dict) -> Request:
     req.http_sec_fetch_user = environ.get("HTTP_SEC_FETCH_USER", "")
     req.http_priority = environ.get("HTTP_PRIORITY", "")
 
+    req.environ = environ
+
     try:
         if req.content_length > 0:
             req.body_stream = environ.get("wsgi.input", None)
