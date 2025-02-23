@@ -2,6 +2,7 @@ import json
 import re
 import urllib.parse
 import traceback
+import io
 from typing import Tuple, Any
 from papys.route import PRoute
 from papys.actions.core import PAction
@@ -282,11 +283,14 @@ def _create_request(environ: dict) -> Request:
 
     try:
         if req.content_length > 0:
-            req.body_stream = environ.get("wsgi.input", None)
-            if req.body_stream:
-                req.body_raw = req.body_stream.read(req.content_length).decode("utf-8")
+            orig_stream = environ.get("wsgi.input", None)
+            if orig_stream:
+                stream_content = orig_stream.read(req.content_length)
+                req.body_stream = io.BytesIO(stream_content)
+                req.body_raw = stream_content.decode("utf-8")
                 req.body_str = str(req.body_raw)
-                req.body_json = json.loads(req.body_raw)
+                req.body_json = json.loads(req.body_raw)                
+
     except json.JSONDecodeError:
         req.body_json = None
     except RecursionError:
@@ -312,7 +316,10 @@ def _evaluate_content(resp: Response):
     if resp.to_convert is not None:
         return [json.dumps(resp.to_convert).encode("utf-8")]
     if resp.custom_bytearray is not None:
-        return [resp.custom_bytearray]
+        if isinstance(resp.custom_bytearray, bytes):
+            return [resp.custom_bytearray]
+        if isinstance(resp.custom_bytearray, bytearray):
+            return [bytes(resp.custom_bytearray)]
     return []
 
 

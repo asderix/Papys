@@ -83,6 +83,9 @@ def papys_action(
                 if isinstance(result, dict):
                     resp.to_convert = result
 
+                if isinstance(result, bytes):
+                    resp.custom_bytearray = result
+
                 if isinstance(result, bytearray):
                     resp.custom_bytearray = result
 
