@@ -16,7 +16,7 @@ Rest-API as DAG is an approach in which the sequence of a request up to the resp
 Papys is a concrete implementation of this approach. It also offers further advantages and is easy to use!
 
 ## Status
-The library is in an early stage of version 0.8.11 with target release 1.0.0 until end of 2025.
+The library is in an early stage of version 0.8.12 with target release 1.0.0 until end of 2025.
 
 ## Project website
 The official project website is here: https://papys.asderix.com/ - Roadmap and release notes are on GitHub-Wiki.
