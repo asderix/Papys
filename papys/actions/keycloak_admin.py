@@ -29,9 +29,12 @@ class KcAddUserAction(PAction):
     def __init__(
         self,
         name: str = "",
-        kc_config: dict = {},
-        status_codes={"success": 200, "error": 500},
+        kc_config: dict = None,
+        status_codes = None,
     ):
+        kc_config = {} if kc_config is None else kc_config
+        status_codes = {"success": 200, "error": 500} if status_codes is None else status_codes
+
         self._kc_config = kc_config
         self._status_codes = status_codes
         super().__init__(name=name)
@@ -198,9 +201,12 @@ class KcChangePwAction(PAction):
     def __init__(
         self,
         name: str = "",
-        kc_config: dict = {},
-        status_codes={"success": 200, "error": 500},
+        kc_config: dict = None,
+        status_codes = None,
     ):
+        kc_config = {} if kc_config is None else kc_config
+        status_codes = {"success": 200, "error": 500} if status_codes is None else status_codes
+
         self._kc_config = kc_config
         self._status_codes = status_codes
         super().__init__(name=name)
@@ -347,9 +353,12 @@ class KcDeleteUserAction(PAction):
     def __init__(
         self,
         name: str = "",
-        kc_config: dict = {},
-        status_codes={"success": 200, "error": 500},
+        kc_config: dict = None,
+        status_codes = None,
     ):
+        kc_config = {} if kc_config is None else kc_config
+        status_codes = {"success": 200, "error": 500} if status_codes is None else status_codes
+
         self._kc_config = kc_config
         self._status_codes = status_codes
         super().__init__(name=name)

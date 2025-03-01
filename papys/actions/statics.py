@@ -20,9 +20,12 @@ class StaticJsonAction(PAction):
     def __init__(
         self,
         name: str = "",
-        json: dict = {},
-        status_codes={"success": 200, "error": 500},
+        json: dict = None,
+        status_codes = None,
     ):
+        json = {} if json is None else json
+        status_codes = {"success": 200, "error": 500} if status_codes is None else status_codes
+
         self._json = json
         self._status_codes = status_codes
         super().__init__(name=name)

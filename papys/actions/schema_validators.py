@@ -25,10 +25,13 @@ class JsonRespValidatorAction(PAction):
     def __init__(
         self,
         name: str = "",
-        schema: dict = {},
-        status_codes={"success": 200, "error": 500},
+        schema: dict = None,
+        status_codes = None,
         return_full_error: bool = False,
     ):
+        schema = {} if schema is None else schema
+        status_codes = {"success": 200, "error": 500} if status_codes is None else status_codes
+
         self._schema = schema
         self._status_codes = status_codes
         self._return_full_error = return_full_error
@@ -79,10 +82,13 @@ class JsonReqValidatorAction(PAction):
     def __init__(
         self,
         name: str = "",
-        schema: dict = {},
-        status_codes={"success": 200, "error": 500},
+        schema: dict = None,
+        status_codes = None,
         return_full_error: bool = False,
     ):
+        schema = {} if schema is None else schema
+        status_codes = {"success": 200, "error": 500} if status_codes is None else status_codes
+
         self._schema = schema
         self._status_codes = status_codes
         self._return_full_error = return_full_error

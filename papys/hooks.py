@@ -35,7 +35,9 @@ class FunctionHook(PHook):
         status_codes (dict): {'error': 500} is default. You can provide an other code to return in case of an exception.
     """
 
-    def __init__(self, hf=None, status_codes: dict = {"error": 500}):
+    def __init__(self, hf=None, status_codes: dict = None):
+        status_codes = {"error": 500} if status_codes is None else status_codes
+
         self.hook_function = hf
         self._status_codes = status_codes
         super().__init__()
@@ -77,8 +79,10 @@ class ParaMapHook(PHook):
     def __init__(
         self,
         map: dict | None = None,
-        status_codes: dict = {"success": 200, "error": 500},
+        status_codes: dict = None,
     ):
+        status_codes = {"success": 200, "error": 500} if status_codes is None else status_codes
+
         self.map = map
         self._status_codes = status_codes
         super().__init__()

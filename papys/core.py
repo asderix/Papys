@@ -196,7 +196,9 @@ def _execute_hook(
         return (True,) + hook_result[1:]
 
 
-def _handle_request(req: Request, resp: Response, actions: dict, alt: list = []):
+def _handle_request(req: Request, resp: Response, actions: dict, alt: list = None):
+    alt = [] if alt is None else alt
+
     cache_result = _path_cache.check(req.request_method, req.path)
     if cache_result[0]:
         action_info = cache_result

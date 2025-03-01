@@ -26,9 +26,12 @@ class KcOidcAcfCallbackAction(PAction):
     def __init__(
         self,
         name: str = "",
-        config: dict = {},
-        status_codes={"error": 500},
+        config: dict = None,
+        status_codes = None,
     ):
+        config = {} if config is None else config
+        status_codes = {"error": 500} if status_codes is None else status_codes
+
         self._status_codes = status_codes
         self._config = config
         super().__init__(name=name)
@@ -117,9 +120,12 @@ class KcOidcAcfLogoutAction(PAction):
     def __init__(
         self,
         name: str = "",
-        config: dict = {},
-        status_codes={"error": 500},
+        config: dict = None,
+        status_codes = None,
     ):
+        config = {} if config is None else config
+        status_codes = {"error": 500} if status_codes is None else status_codes
+        
         self._status_codes = status_codes
         self._config = config
         super().__init__(name=name)

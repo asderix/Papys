@@ -28,8 +28,10 @@ class KcOidcAcfRouteGuardHook(PHook):
     def __init__(
         self,
         config=None,
-        status_codes: dict = {"success": 200, "unauthorized": 401, "error": 500},
+        status_codes: dict = None,
     ):
+        status_codes = {"success": 200, "unauthorized": 401, "error": 500} if status_codes is None else status_codes
+
         self._config = config
         self._status_codes = status_codes
         super().__init__()
@@ -142,8 +144,10 @@ class KcOidcCcfRouteGuardHook(PHook):
     def __init__(
         self,
         config=None,
-        status_codes: dict = {"success": 200, "unauthorized": 401, "error": 500},
+        status_codes: dict = None,
     ):
+        status_codes = {"success": 200, "unauthorized": 401, "error": 500} if status_codes is None else status_codes
+        
         self._config = config
         self._status_codes = status_codes
         super().__init__()

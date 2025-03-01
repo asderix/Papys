@@ -18,8 +18,10 @@ class PostBounceAction(PAction):
     def __init__(
         self,
         name: str = "",
-        status_codes={"success": 200, "error": 500},
+        status_codes = None,
     ):
+        status_codes = {"success": 200, "error": 500} if status_codes is None else status_codes
+        
         self._status_codes = status_codes
         super().__init__(name=name)
 

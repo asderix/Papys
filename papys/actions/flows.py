@@ -21,9 +21,11 @@ class RedirectAction(PAction):
         self,
         name: str = "",
         url: str = "/",
-        redirect_status_code=302,
-        status_codes={"error": 500},
+        redirect_status_code = 302,
+        status_codes = None,
     ):
+        status_codes = {"error": 500} if status_codes is None else status_codes
+        
         self._url = url
         self.redirect_status_code = redirect_status_code
         self._status_codes = status_codes

@@ -40,11 +40,13 @@ def _get_path_process_or_query_parameter(req: Request, name: str):
 
 
 def papys_action(
-    param: dict = {},
+    param: dict = None,
     succ_code: int = 200,
     error_code: int = 500,
     return_mimetype: str | None = None,
 ):
+    param = {} if param is None else param
+
     def decorator(func):
         @wraps(func)
         def wrapper(req: Request, resp: Response):
